@@ -1,0 +1,37 @@
+{
+	"name": "scrapper-api",
+	"version": "0.0.1",
+	"scripts": {
+		"start": "npm run dev",
+		"dev": "NODE_OPTIONS=--inspect vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^2.0.0",
+		"@sveltejs/kit": "^1.5.0",
+		"@types/hark": "^1.2.2",
+		"@types/html-to-text": "^9.0.0",
+		"@types/jsdom": "^21.1.0",
+		"@types/recordrtc": "^5.6.11",
+		"puppeteer": "^19.7.5",
+		"svelte": "^3.54.0",
+		"svelte-check": "^3.0.1",
+		"svelte-preprocess": "^5.0.3",
+		"svelte-toggle": "^3.1.0",
+		"tslib": "^2.4.1",
+		"typescript": "^4.9.3",
+		"vite": "^4.0.0"
+	},
+	"type": "module",
+	"dependencies": {
+		"@mozilla/readability": "^0.4.2",
+		"@sparticuz/chromium-min": "^113.0.1",
+		"html-to-text": "^9.0.4",
+		"jsdom": "^21.1.1",
+		"open-graph-scraper": "^5.2.3",
+		"puppeteer-core": "^19.7.5"
+	}
+}
