@@ -2,12 +2,12 @@
 	"name": "scrapper-api",
 	"version": "0.0.1",
 	"scripts": {
-		"start": "npm run dev",
-		"dev": "NODE_OPTIONS=--inspect vite dev",
+		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
+		"start": "node build",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^2.0.0",
