@@ -2,7 +2,7 @@
 	"name": "scrapper-api",
 	"version": "0.0.1",
 	"scripts": {
-		"start": "npm run dev",
+		"start": "node build",
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
@@ -29,6 +29,7 @@
 	"dependencies": {
 		"@mozilla/readability": "^0.4.2",
 		"@sparticuz/chromium-min": "^113.0.1",
+		"@sveltejs/adapter-node": "^1.2.4",
 		"html-to-text": "^9.0.4",
 		"jsdom": "^21.1.1",
 		"open-graph-scraper": "^5.2.3",
