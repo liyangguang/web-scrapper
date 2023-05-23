@@ -3,7 +3,7 @@ import type { RequestHandler } from '../$types';
 import {getFromWebpage} from '$lib/server/crawler';
 
 export const POST = (async ({request}) => {
-  console.info('[API: /ingest/scrape] Start...');
+  console.info('[API: /scrapper] Start...');
   const requestBody = await request.json();
   const {url} = requestBody;
 
@@ -11,10 +11,10 @@ export const POST = (async ({request}) => {
   try {
     result = await getFromWebpage(url);
 
-    console.info('[API: /ingest/scrape] Done!');
+    console.info('[API: /scrapper] Done!');
     return new Response(JSON.stringify({result}));
   } catch (e) {
-    console.info('[API: /ingest/scrape] Error');
+    console.info('[API: /scrapper] Error');
     console.error(e);
     throw error(400, (e as Error)?.message);
   }
