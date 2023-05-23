@@ -1,15 +1,15 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from '../$types';
-import {getFromWebpage} from '$lib/server/crawler';
+import {getFromWebpage} from '$lib/server/puppeteer';
+import {run} from '$lib/server/crawlee';
 
 export const POST = (async ({request}) => {
-  console.info('[API: /scrapper] Start...');
   const requestBody = await request.json();
   const {url} = requestBody;
+  console.info('[API: /scrapper] Start...', url);
 
-  let result = '';
   try {
-    result = await getFromWebpage(url);
+    const result = await run();
 
     console.info('[API: /scrapper] Done!');
     return new Response(JSON.stringify({result}));

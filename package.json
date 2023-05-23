@@ -30,9 +30,11 @@
 		"@mozilla/readability": "^0.4.2",
 		"@sparticuz/chromium-min": "^113.0.1",
 		"@sveltejs/adapter-node": "^1.2.4",
+		"crawlee": "^3.3.2",
 		"html-to-text": "^9.0.4",
 		"jsdom": "^21.1.1",
 		"open-graph-scraper": "^5.2.3",
+		"playwright": "^1.34.1",
 		"puppeteer-core": "^19.7.5"
 	}
 }
