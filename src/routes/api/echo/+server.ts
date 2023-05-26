@@ -1,6 +1,6 @@
 import type { RequestHandler } from '../$types';
 
 export const POST = (async () => {
-  console.info('[API: /test] Start...');
-  return new Response(JSON.stringify({done: true}));
+  console.info('[API: /echo] Start...');
+  return new Response(JSON.stringify({echo: true}));
 }) satisfies RequestHandler;

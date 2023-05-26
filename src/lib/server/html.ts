@@ -1,21 +1,20 @@
-import ogs from 'open-graph-scraper';
 import { Readability } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 import { convert } from 'html-to-text';
 
-export async function fetchOpenGraph(url:string): Promise<string> {
-  console.info('[OpenGraph]', url);
-  try {
-    const res = await ogs({url});
-    const htmlString = (res.response as {body: string})?.body || '';
-    const readableDocument = getReadableDocument(htmlString, url);
-    const textOnlyHtml = praseTextOnly(copyDocument(readableDocument, url));
-  
-    return textOnlyHtml;
-  } catch (e) {
-    console.warn('[OpenGraph] Failed to load page', url);
-    return '';
+export function getContentString(bodyString: string, url: string): string {
+  const doc = new JSDOM(bodyString, {url});
+  const reader = new Readability(doc.window.document);
+  const readabilityResult = reader.parse()!;
+  const cleanedDOM = new JSDOM(readabilityResult.content, {url});
+  // Remove information that is not useful in text context.
+  for (const aEl of [...cleanedDOM.window.document.querySelectorAll('a')]) {
+    aEl.href = '';
   }
+  for (const aEl of [...cleanedDOM.window.document.querySelectorAll('img, video, object')]) {
+    aEl.remove();
+  }
+  return convert(cleanedDOM.window.document.querySelector('body')!.innerHTML, {selectors: [{selector: 'table', format: 'dataTable'}]})
 }
 
 function getReadableDocument(htmlString: string, url: string): Document {

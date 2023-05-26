@@ -1,33 +1,32 @@
-import type {Page} from 'puppeteer-core';
-import chromium from '@sparticuz/chromium-min';
-import { Readability } from '@mozilla/readability';
-import { JSDOM } from 'jsdom';
-import { convert } from 'html-to-text';
+import puppeteer, {type Page, Browser} from 'puppeteer';
+import { getContentString } from './html';
 
 const IS_DEBUGGING = false;
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
-const CHROMIUM_DOWNLOAD_URL = 'https://github.com/Sparticuz/chromium/releases/download/v110.0.1/chromium-v110.0.1-pack.tar';
+let browser: Browser|undefined;
 
 async function getBrowserInstance() {
-  const puppeteer = IS_DEVELOPMENT ? await import('puppeteer') : await import('puppeteer-core');
-  return await puppeteer.launch({
-    executablePath: IS_DEVELOPMENT ? undefined : await chromium.executablePath(CHROMIUM_DOWNLOAD_URL),
-    args: chromium.args,
+  if (browser) return browser;
+
+  browser = await puppeteer.launch({
     defaultViewport: {
       width: 1280,
       height: 600,
     },
+    headless: 'new',
     ...(IS_DEVELOPMENT && IS_DEBUGGING ? {headless: false, slowMo: 50} : {}),
-  })
+  });
+  return browser;
 }
 
-export async function getFromWebpage(url: string, preProcess?: (page: Page) => Promise<void>, manualSelector: string[] = []): Promise<string> {
-  console.info('[Puppeteer] Starting...')
+export async function getFromWebpage(url: string, manualSelector?: string, preProcess?: (page: Page) => Promise<void>): Promise<string> {
+  console.info('[Puppeteer] Starting...');
   const browser = await getBrowserInstance();
   const page = await browser.newPage();
 
   try {
+    console.info('[Puppeteer] Navigating...');
     await page.goto(url, {timeout: 15000});
   } catch {
     // Some websites (e.g. traditional big news) keeps loading for a very long time (ads, etc.), while the main content on the page is ready.
@@ -36,20 +35,18 @@ export async function getFromWebpage(url: string, preProcess?: (page: Page) => P
   }
 
   console.info('[Puppeteer] Running pre-processing...');
-  preProcess && await preProcess(page);
+  preProcess?.(page);
 
   console.info('[Puppeteer] Getting text...');
   let result = '';
-  if (manualSelector.length) {
+  if (manualSelector) {
     console.info('[Puppeteer] Using manual selectors...');
-    const text = await Promise.all(manualSelector.map(async (selector) => {
-      const elementsMatchingThisSelector = await page.$$(selector);
-      return Promise.all(elementsMatchingThisSelector.map((element) => page.evaluate(el => el.innerText, element)))
-    }));
-    result = text.flat().filter((content): content is string => !!content).join('\n');
+    const elements = await page.$$(manualSelector);
+    const text = await Promise.all(elements.map((element) => page.evaluate(el => el.innerText, element)))
+    result = text.filter((content): content is string => !!content).join('\n');
   } else {
     const bodyHTML = await page.$eval('body', (element) => element.innerHTML);
-    result = cleanUpHTML(bodyHTML, url);
+    result = getContentString(bodyHTML, url);
   }
   await browser.close();
   console.info('[Puppeteer] Done.')
@@ -62,19 +59,4 @@ async function waitAndClick(page: Page, containerSelector: string, targetSelecto
   // While using JS to directly click the element is fine (not using the position).
   // await page.click(`${containerSelector} ${targetSelector}`);
   await page.$eval(`${containerSelector} ${targetSelector}`, (elem) => (elem as HTMLElement).click());
-}
-
-function cleanUpHTML(bodyString: string, url: string): string {
-  const doc = new JSDOM(bodyString, {url});
-  const reader = new Readability(doc.window.document);
-  const readabilityResult = reader.parse()!;
-  const cleanedDOM = new JSDOM(readabilityResult.content, {url});
-  // Remove information that is not useful in text context.
-  for (const aEl of [...cleanedDOM.window.document.querySelectorAll('a')]) {
-    aEl.href = '';
-  }
-  for (const aEl of [...cleanedDOM.window.document.querySelectorAll('img, video, object')]) {
-    aEl.remove();
-  }
-  return convert(cleanedDOM.window.document.querySelector('body')!.innerHTML, {selectors: [{selector: 'table', format: 'dataTable'}]})
 }
