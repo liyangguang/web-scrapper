@@ -1,41 +1,36 @@
 import { Readability } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 import { convert } from 'html-to-text';
+import TurndownService from 'turndown';
 
-export function getContentString(bodyString: string, url: string): string {
+const turndownService = new TurndownService();
+
+export function getReadabilityHtml(bodyString: string, url?: string): string {
   const doc = new JSDOM(bodyString, {url});
   const reader = new Readability(doc.window.document);
   const readabilityResult = reader.parse()!;
-  const cleanedDOM = new JSDOM(readabilityResult.content, {url});
-  // Remove information that is not useful in text context.
-  for (const aEl of [...cleanedDOM.window.document.querySelectorAll('a')]) {
+  return readabilityResult.content;
+}
+
+export function getContentString(bodyString: string, url?: string): string {
+  const dom = new JSDOM(bodyString, {url});
+  removeNonVisual(dom.window.document);
+  return convert(dom.window.document.querySelector('body')!.innerHTML, {
+    selectors: [{selector: 'table', format: 'dataTable'}],
+  });
+}
+
+export function getContentMarkdown(bodyString: string, url?: string): string {
+  const dom = new JSDOM(bodyString, {url});
+  removeNonVisual(dom.window.document);
+  return turndownService.turndown(dom.window.document.querySelector('body')!.innerHTML);
+}
+
+function removeNonVisual(document: Document) {
+  for (const aEl of [...document.querySelectorAll('a')]) {
     aEl.href = '';
   }
-  for (const aEl of [...cleanedDOM.window.document.querySelectorAll('img, video, object')]) {
+  for (const aEl of [...document.querySelectorAll('img, video, object')]) {
     aEl.remove();
   }
-  return convert(cleanedDOM.window.document.querySelector('body')!.innerHTML, {selectors: [{selector: 'table', format: 'dataTable'}]})
-}
-
-function getReadableDocument(htmlString: string, url: string): Document {
-  const doc = new JSDOM(htmlString, {url});
-  const reader = new Readability(doc.window.document);
-  const readabilityResult = reader.parse()!;
-  const cleanedDOM = new JSDOM(readabilityResult.content, {url});
-  return cleanedDOM.window.document;
-}
-
-function copyDocument(origin: Document, url: string): Document {
-  return new JSDOM(origin.body.innerHTML, {url}).window.document;
-}
-
-function praseTextOnly(readableDocument: Document): string {
-  // Remove information that is not useful in text context.
-  for (const aEl of [...readableDocument.querySelectorAll('a')]) {
-    aEl.href = '';
-  }
-  for (const aEl of [...readableDocument.querySelectorAll('img, video, object')]) {
-    aEl.remove();
-  }
-  return convert(readableDocument.querySelector('body')!.innerHTML, {selectors: [{selector: 'table', format: 'dataTable'}]})
 }

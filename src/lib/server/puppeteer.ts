@@ -1,10 +1,25 @@
 import puppeteer, {type Page, Browser} from 'puppeteer';
-import { getContentString } from './html';
+import { getReadabilityHtml, getContentString, getContentMarkdown } from './html';
 
 const IS_DEBUGGING = false;
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
 let browser: Browser|undefined;
+
+export async function scrapePage(url: string, format: 'html'|'text'|'markdown', withReadability: boolean, manualSelector?: string, preProcess?: (page: Page) => Promise<void>): Promise<string> {
+  const html = await scrapeHtml(url, manualSelector, preProcess);
+  const readyHtml = withReadability ? getReadabilityHtml(html) : html;
+  switch (format) {
+    case 'html':
+      return readyHtml;
+    case 'markdown':
+      return getContentMarkdown(readyHtml);
+    case 'text':
+      return getContentString(readyHtml);
+    default:
+      throw new Error(`Failed to scrape. Unknown format: ${format}`);
+  }
+}
 
 async function getBrowserInstance() {
   if (browser) return browser;
@@ -20,7 +35,7 @@ async function getBrowserInstance() {
   return browser;
 }
 
-export async function getFromWebpage(url: string, manualSelector?: string, preProcess?: (page: Page) => Promise<void>): Promise<string> {
+async function scrapeHtml(url: string, manualSelector?: string, preProcess?: (page: Page) => Promise<void>): Promise<string> {
   console.info('[Puppeteer] Starting...');
   const browser = await getBrowserInstance();
   const page = await browser.newPage();
@@ -42,11 +57,10 @@ export async function getFromWebpage(url: string, manualSelector?: string, prePr
   if (manualSelector) {
     console.info('[Puppeteer] Using manual selectors...');
     const elements = await page.$$(manualSelector);
-    const text = await Promise.all(elements.map((element) => page.evaluate(el => el.innerText, element)))
-    result = text.filter((content): content is string => !!content).join('\n');
+    const htmlPieces = await Promise.all(elements.map((element) => page.evaluate(el => el.outerHTML, element)));
+    result = `<body>${htmlPieces.join('\n')}</body>`;
   } else {
-    const bodyHTML = await page.$eval('body', (element) => element.innerHTML);
-    result = getContentString(bodyHTML, url);
+    result = await page.$eval('body', (element) => element.outerHTML);
   }
   await browser.close();
   console.info('[Puppeteer] Done.')
