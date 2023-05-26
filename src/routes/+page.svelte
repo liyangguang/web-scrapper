@@ -1,6 +1,9 @@
 <script lang="ts">
   async function debug() {
-    const res = await _fetchApi('scrapper', {url: 'https://en.wikipedia.org/wiki/Pro_Football_Hall_of_Fame'})
+    const res = await _fetchApi('scrapper', {
+      url: 'https://en.wikipedia.org/wiki/Pro_Football_Hall_of_Fame',
+      format: 'html',
+    })
     console.log(res);
   }
 

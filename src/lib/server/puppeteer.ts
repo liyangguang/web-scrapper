@@ -6,7 +6,7 @@ const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
 let browser: Browser|undefined;
 
-export async function scrapePage(url: string, format: 'html'|'text'|'markdown', withReadability: boolean, manualSelector?: string, preProcess?: (page: Page) => Promise<void>): Promise<string> {
+export async function scrapePage(url: string, format: 'html'|'text'|'markdown', withReadability = true, manualSelector?: string, preProcess?: (page: Page) => Promise<void>): Promise<string> {
   const html = await scrapeHtml(url, manualSelector, preProcess);
   const readyHtml = withReadability ? getReadabilityHtml(html) : html;
   switch (format) {
