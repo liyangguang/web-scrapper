@@ -25,6 +25,7 @@ async function getBrowserInstance() {
       width: 1280,
       height: 600,
     },
+    args: ['--no-sandbox'],
     headless: 'new',
     ...(IS_DEVELOPMENT && IS_DEBUGGING ? {headless: false, slowMo: 50} : {}),
   });
