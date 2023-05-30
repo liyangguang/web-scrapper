@@ -4,8 +4,6 @@ import { getReadabilityHtml, getContentString, getContentMarkdown } from './html
 const IS_DEBUGGING = false;
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
-let browser: Browser|undefined;
-
 export async function scrapePage(url: string, format: 'html'|'text'|'markdown', withReadability = true, manualSelector?: string, preProcess?: (page: Page) => Promise<void>): Promise<string> {
   const html = await scrapeHtml(url, manualSelector, preProcess);
   const readyHtml = withReadability ? getReadabilityHtml(html) : html;
@@ -22,9 +20,7 @@ export async function scrapePage(url: string, format: 'html'|'text'|'markdown', 
 }
 
 async function getBrowserInstance() {
-  if (browser) return browser;
-
-  browser = await puppeteer.launch({
+  return await puppeteer.launch({
     defaultViewport: {
       width: 1280,
       height: 600,
@@ -32,7 +28,6 @@ async function getBrowserInstance() {
     headless: 'new',
     ...(IS_DEVELOPMENT && IS_DEBUGGING ? {headless: false, slowMo: 50} : {}),
   });
-  return browser;
 }
 
 async function scrapeHtml(url: string, manualSelector?: string, preProcess?: (page: Page) => Promise<void>): Promise<string> {
