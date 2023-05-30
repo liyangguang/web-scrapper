@@ -25,10 +25,10 @@ export function getContentMarkdown(bodyString: string, url?: string): string {
 }
 
 function removeNonVisual(document: Document) {
-  for (const aEl of [...document.querySelectorAll('a')]) {
+  for (const aEl of Array.from(document.querySelectorAll('a'))) {
     aEl.href = '';
   }
-  for (const aEl of [...document.querySelectorAll('img, video, object')]) {
+  for (const aEl of Array.from(document.querySelectorAll('img, video, object'))) {
     aEl.remove();
   }
 }

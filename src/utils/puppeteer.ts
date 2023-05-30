@@ -62,10 +62,10 @@ async function scrapeHtml(url: string, manualSelector?: string, preProcess?: (pa
   return result;
 }
 
-async function waitAndClick(page: Page, containerSelector: string, targetSelector = ''): Promise<void> {
-  await page.waitForSelector(containerSelector);
-  // `page.click()` seems unreliable in some cases. When the page jumps due to loading (ads) during the command, the cursor will click on the previous position of the element.
-  // While using JS to directly click the element is fine (not using the position).
-  // await page.click(`${containerSelector} ${targetSelector}`);
-  await page.$eval(`${containerSelector} ${targetSelector}`, (elem) => (elem as HTMLElement).click());
-}
+// async function waitAndClick(page: Page, containerSelector: string, targetSelector = ''): Promise<void> {
+//   await page.waitForSelector(containerSelector);
+//   // `page.click()` seems unreliable in some cases. When the page jumps due to loading (ads) during the command, the cursor will click on the previous position of the element.
+//   // While using JS to directly click the element is fine (not using the position).
+//   // await page.click(`${containerSelector} ${targetSelector}`);
+//   await page.$eval(`${containerSelector} ${targetSelector}`, (elem) => (elem as HTMLElement).click());
+// }
