@@ -1,9 +1,7 @@
 import { Readability } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 import { convert } from 'html-to-text';
-import TurndownService from 'turndown';
-
-const turndownService = new TurndownService();
+import { NodeHtmlMarkdown } from 'node-html-markdown'
 
 export function getReadabilityHtml(bodyString: string, url?: string): string {
   const doc = new JSDOM(bodyString, {url});
@@ -23,7 +21,7 @@ export function getContentString(bodyString: string, url?: string): string {
 export function getContentMarkdown(bodyString: string, url?: string): string {
   const dom = new JSDOM(bodyString, {url});
   removeNonVisual(dom.window.document);
-  return turndownService.turndown(dom.window.document.querySelector('body')!.innerHTML);
+  return NodeHtmlMarkdown.translate(dom.window.document.querySelector('body')!.innerHTML);
 }
 
 function removeNonVisual(document: Document) {

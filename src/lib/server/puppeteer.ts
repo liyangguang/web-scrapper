@@ -1,4 +1,4 @@
-import puppeteer, {type Page, Browser} from 'puppeteer';
+import puppeteer, {type Page} from 'puppeteer';
 import { getReadabilityHtml, getContentString, getContentMarkdown } from './html';
 
 const IS_DEBUGGING = false;
